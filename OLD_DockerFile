@@ -1,0 +1,15 @@
+FROM ubuntu:latest
+
+WORKDIR /app
+
+COPY index.html .
+
+RUN apt-get update
+RUN apt-get install -y mariadb-server
+RUN apt-get install -y nodejs npm
+RUN npm install -g http-server
+
+
+EXPOSE 8080 3306
+
+CMD service mariadb start && http-server -p 8080

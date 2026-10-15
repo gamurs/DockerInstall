@@ -1,0 +1,46 @@
+---
+
+- hosts: CentOS
+  become: true
+  tasks:
+    - name: Install dnf core plugins
+      dnf:
+        name:
+          - dnf-plugins-core
+        state: latest
+        update_cache: yes
+
+    - name: Setup repository
+      shell:
+        cmd: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: Install Docker Engine
+      dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest
+        update_cache: yes
+
+    - name: start DockerEngine
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+
+    - name: Transfer Dockerfile from control node to managed node
+      copy:
+        src: ~/DockerInstall/Dockerfile
+        dest: /tmp/
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Run Docker build
+      community.docker.docker_image_build:
+        name: webndbserver
+        path: /tmp
